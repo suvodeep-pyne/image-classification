@@ -1,11 +1,11 @@
 clear all
 
-I = im2double(imread('apple.jpg'));
+I = im2double(imread('Katrina-kaif-164a.jpg'));
 image(I);
 I = single(rgb2gray(I)) ;
 [f,d] = vl_sift(I) ;
 perm = randperm(size(f,2)) ;
-sel = perm(1:1) ;
+sel = perm(1:100) ;
 h1 = vl_plotframe(f(:,sel)) ;
 h2 = vl_plotframe(f(:,sel)) ;
 set(h1,'color','k','linewidth',3) ;
