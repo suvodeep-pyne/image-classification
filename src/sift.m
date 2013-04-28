@@ -17,3 +17,20 @@ end
 k = cols/length(files);
 sift_vectors_cluster = single(sift_vectors_cluster) ;
 [idx, C] = kmeans(sift_vectors_cluster, k);
+
+%create histogram of k bins for each image
+
+
+%histograms are input to svmtrain
+groups = ones(length(files));
+SVMstruct = svmtrain(data,groups,'Kernel_Function','rbf');
+
+%classify new image
+newImage = im2double(imread(filePath));
+newImage = single(rgb2gray(newImage)) ;
+[f, d] = vl_sift(newImage, 'PeakThresh', 0.01);
+sift_feat = d;
+%create histogram for sift fetaures of new image
+
+
+newClassification = svmclassify(SVMstruct,newData);
