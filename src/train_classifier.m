@@ -33,10 +33,11 @@ function [output, centers] = train_classifier()
     
     % Running K Means Clustering
     ncols = size(sift_vectors_cluster, 2);
-    k = ncols / length(files);
+    %k = ncols / length(files);
+    k = 10;
     sift_vectors_cluster = single(sift_vectors_cluster);
     [C, idx] = kmeans(sift_vectors_cluster, k);
-    k = size(C, 2);
+    %k = size(C, 2);
     
     % Generating Image Histogram in terms of K centers
     img_hist = generate_image_histogram(files, sift_vectors, idx, k);
@@ -52,8 +53,9 @@ function [sift_vectors, sift_vectors_cluster] = run_sift(image_files)
     sift_vectors = cell(1, length(image_files));    
     sift_vectors_cluster = [];
     for i=1:length(image_files)
-        filepath = strcat('images\', image_files(i).name);
-        I = single(rgb2gray(im2double(imread(filepath)))) ;
+        filepath = strcat('circle\', image_files(i).name)
+        I = im2double(imread(filepath));
+        I = single(rgb2gray(I)) ;
         
         % Extract Features
         [frames, descriptors] = vl_sift(I, 'PeakThresh', 0.01);
