@@ -10,9 +10,10 @@ function output = train_classifier(directory)
     k = ncols / length(files);
     sift_vectors_cluster = single(sift_vectors_cluster);
     [C, idx] = kmeans(sift_vectors_cluster, k);
+    k = size(C, 2);
     
     % Generating Image Histogram in terms of K centers
-    img_hist = generate_image_histogram(files, sift_vectors, idx);
+    img_hist = generate_image_histogram(files, sift_vectors, idx, k);
     
     % Train SVM
     
@@ -34,8 +35,7 @@ function [sift_vectors, sift_vectors_cluster] = run_sift(image_files)
     end
 end
 
-function img_hist = generate_image_histogram(image_files, sift_vectors, idx)
-    num_centers = size(idx, 2);
+function img_hist = generate_image_histogram(image_files, sift_vectors, idx, num_centers)
     img_hist = zeros(length(image_files), num_centers);
     start_index = 0;
     count = 1;
