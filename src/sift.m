@@ -8,7 +8,7 @@ for i=1:length(files)
     temp = strcat('images\', files(i).name);
     I = im2double(imread(temp));
     I = single(rgb2gray(I)) ;
-    [f, d] = vl_sift(I, 'PeakThresh', 0.01);
+    [~, d] = vl_sift(I, 'PeakThresh', 0.01);
     sift_vectors{i} = d;
     sift_vectors_cluster = [sift_vectors_cluster d] ;
 end
