@@ -50,5 +50,6 @@ function img_hist = generate_image_histogram(image_files, sift_vectors, idx, num
         end
         start_index = start_index + ncols;
         count = count + 1;
+
     end
 end
