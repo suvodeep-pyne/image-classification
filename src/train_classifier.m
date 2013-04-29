@@ -1,30 +1,4 @@
-function output = classify_image(filepath)
-    [SVMstr, C] = train_classifier();
-    
-    % Extract sift features from image
-    I = single(rgb2gray(im2double(imread(filepath)))) ;
-    [~, descriptors] = vl_sift(I, 'PeakThresh', 0.01);
-    img_hist = zeros(1, num_centers);
-    ncols = size(descriptors, 2);
-    clusters = size(C, 2);
-    for col=1:ncols
-        dist = inf;
-        cluster_idx = -1;
-        for clus=1:clusters
-            tmp_dist = sqrt(sum((diff([descriptors(:,col); C(:,clus)])).^2));
-            if(tmp_dist < dist)
-                dist = tmp_dist;
-                cluster_idx = clus;
-            end
-        end
-        img_hist(1, cluster_idx) = img_hist(1, cluster_idx) + 1;
-    end
-    % Classify image
-    classification = svmclassify(SVMstr, img_hist);
-    output = classification;
-end
-
-function [output, centers] = train_classifier()
+function output = train_classifier(directory)
     directory = 'images\*.jpg';
     files = dir(directory);
     
@@ -33,29 +7,25 @@ function [output, centers] = train_classifier()
     
     % Running K Means Clustering
     ncols = size(sift_vectors_cluster, 2);
-    %k = ncols / length(files);
-    k = 10;
+    k = ncols / length(files);
     sift_vectors_cluster = single(sift_vectors_cluster);
     [C, idx] = kmeans(sift_vectors_cluster, k);
-    %k = size(C, 2);
+    k = size(C, 2);
     
     % Generating Image Histogram in terms of K centers
     img_hist = generate_image_histogram(files, sift_vectors, idx, k);
     
     % Train SVM
-    group = ones(length(files));
-    SVMstruct = svmtrain(img_hist, group, 'Kernel_Function', 'rbf');
-    output = SVMstruct;
-    centers = C;
+    
+    output = img_hist;
 end
 
 function [sift_vectors, sift_vectors_cluster] = run_sift(image_files)
     sift_vectors = cell(1, length(image_files));    
     sift_vectors_cluster = [];
     for i=1:length(image_files)
-        filepath = strcat('circle\', image_files(i).name)
-        I = im2double(imread(filepath));
-        I = single(rgb2gray(I)) ;
+        filepath = strcat('images\', image_files(i).name);
+        I = single(rgb2gray(im2double(imread(filepath)))) ;
         
         % Extract Features
         [frames, descriptors] = vl_sift(I, 'PeakThresh', 0.01);
@@ -77,5 +47,6 @@ function img_hist = generate_image_histogram(image_files, sift_vectors, idx, num
         end
         start_index = start_index + ncols;
         count = count + 1;
+
     end
 end
