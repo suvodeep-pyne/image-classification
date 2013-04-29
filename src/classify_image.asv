@@ -3,13 +3,26 @@ function output = classify_image(filepath)
     
     % Extract sift features from image
     I = single(rgb2gray(im2double(imread(filepath)))) ;
-    [~, descriptors] = vl_sift(I, 'PeakThresh', 0.01);
-    img_hist = zeros(1, num_centers);
+    [~, descriptors] = vl_sift(I, 'PeakThresh', 0.001);
+    img_hist = zeros(1, size(C, 2));
     ncols = size(descriptors, 2);
-    dist
+    clusters = size(C, 2);
     for col=1:ncols
-        Edist = sqrt(sum((diff([descriptors(:,col);C(:,col)])).^2));
-        cluster_idx = ;
+        dist = inf;
+        cluster_idx = -1;
+        for clus=1:clusters
+            %tmp_dist = sqrt(sum((diff([descriptors(:,col); C(:,clus)])).^2));
+            tmp_diff = 0;
+            for itr=1:size(C, 1)
+                descriptors(:,col) = typecast(descriptors(:,col), 'uint32');
+                tmp_diff = tmp_diff + (descriptors(itr,col) - C(itr,clus))^2;
+            end
+            tmp_dist = sqrt(tmp_diff);
+            if(tmp_dist < dist)
+                dist = tmp_dist;
+                cluster_idx = clus;
+            end
+        end
         img_hist(1, cluster_idx) = img_hist(1, cluster_idx) + 1;
     end
     % Classify image
@@ -17,7 +30,7 @@ function output = classify_image(filepath)
     output = classification;
 end
 
-function [output, centers] = train_classifier(~)
+function [output, centers] = train_classifier()
     directory = 'images\*.jpg';
     files = dir(directory);
     
@@ -35,7 +48,8 @@ function [output, centers] = train_classifier(~)
     img_hist = generate_image_histogram(files, sift_vectors, idx, k);
     
     % Train SVM
-    group = ones(length(files));
+    group = ones(length(files), 1);
+    group(6:10) = -1;
     SVMstruct = svmtrain(img_hist, group, 'Kernel_Function', 'rbf');
     output = SVMstruct;
     centers = C;
@@ -68,6 +82,5 @@ function img_hist = generate_image_histogram(image_files, sift_vectors, idx, num
         end
         start_index = start_index + ncols;
         count = count + 1;
-
     end
 end

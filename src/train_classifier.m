@@ -1,29 +1,3 @@
-function output = classify_image(filepath)
-    [SVMstr, C] = train_classifier();
-    
-    % Extract sift features from image
-    I = single(rgb2gray(im2double(imread(filepath)))) ;
-    [~, descriptors] = vl_sift(I, 'PeakThresh', 0.01);
-    img_hist = zeros(1, num_centers);
-    ncols = size(descriptors, 2);
-    clusters = size(C, 2);
-    for col=1:ncols
-        dist = inf;
-        cluster_idx = -1;
-        for clus=1:clusters
-            tmp_dist = sqrt(sum((diff([descriptors(:,col); C(:,clus)])).^2));
-            if(tmp_dist < dist)
-                dist = tmp_dist;
-                cluster_idx = clus;
-            end
-        end
-        img_hist(1, cluster_idx) = img_hist(1, cluster_idx) + 1;
-    end
-    % Classify image
-    classification = svmclassify(SVMstr, img_hist);
-    output = classification;
-end
-
 function [output, centers] = train_classifier()
     directory = 'images\*.jpg';
     files = dir(directory);
@@ -42,7 +16,8 @@ function [output, centers] = train_classifier()
     img_hist = generate_image_histogram(files, sift_vectors, idx, k);
     
     % Train SVM
-    group = ones(length(files));
+    group = ones(length(files), 1);
+    group(6:10) = -1;
     SVMstruct = svmtrain(img_hist, group, 'Kernel_Function', 'rbf');
     output = SVMstruct;
     centers = C;
@@ -56,7 +31,7 @@ function [sift_vectors, sift_vectors_cluster] = run_sift(image_files)
         I = single(rgb2gray(im2double(imread(filepath)))) ;
         
         % Extract Features
-        [frames, descriptors] = vl_sift(I, 'PeakThresh', 0.01);
+        [frames, descriptors] = vl_sift(I, 'PeakThresh', 0.001);
         
         sift_vectors{i} = descriptors;
         sift_vectors_cluster = [sift_vectors_cluster descriptors] ;
